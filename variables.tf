@@ -82,6 +82,7 @@ variable "bamboo_license" {
   sensitive   = true
 }
 
+// TODO: add validation for username
 variable "bamboo_admin_username" {
   description = "Bamboo system administrator username."
   type        = string
