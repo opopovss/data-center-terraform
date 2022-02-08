@@ -13,11 +13,11 @@ awsInstances = require('./assets/awsMetadata').awsInstances
 awsRegions = require('./assets/awsMetadata').awsRegions
 
 
-figlet.text('DC Terra', {
+figlet.text('DC Terraform', {
     font: 'block',
     horizontalLayout: 'default',
     verticalLayout: 'default',
-    width: 100,
+    width: 200,
     whitespaceBreak: true
 }, async function (err, data) {
     if (err) {
@@ -36,6 +36,17 @@ figlet.text('DC Terra', {
     runCofig(config)
 });
 
+async function askConfigOption(inquirer) {
+    return inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'configChoice',
+                message: `Select deployment strategy`,
+                choices: ['Quick start (use predefined value)', 'Custom']
+            }
+        ])
+}
 
 async function createDefaultConfig(inquirer) {
     console.log(chalk.magentaBright(`Default Configuration`), "\n");
@@ -162,20 +173,15 @@ async function askClusterData(inquirer) {
                 }
                 return true;
             },
+        },
+        {
+            type: 'editor',
+            name: 'tags',
+            message: `Provide resource tags (Optional
+                ). e.g. key = "value"`,
         }]);
 }
 
-async function askConfigOption(inquirer) {
-    return inquirer
-        .prompt([
-            {
-                type: 'list',
-                name: 'configChoice',
-                message: `Select deployment strategy`,
-                choices: ['Quick start (use predefined value)', 'Custom']
-            }
-        ])
-}
 
 async function askProductData(inquirer) {
     return inquirer
@@ -344,7 +350,7 @@ function runCofig(config) {
     fs.writeFileSync(`../${config.envName}.config.tfvars`, output)
 
     const spawnSync = require('child_process').spawnSync;
-    spawnSync('../install.sh', ['-c', '../jjeong-test.tfvars'], { stdio: 'inherit', shell: true });
+    spawnSync('../install.sh', ['-c', `../${config.envName}.config.tfvars`], { stdio: 'inherit', shell: true });
 }
 
 function searchInstanceTypes(answers, input) {
