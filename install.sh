@@ -58,15 +58,14 @@ process_arguments() {
   # set the default value for config file if is not provided
   if [ -z "${CONFIG_FILE}" ]; then
     CONFIG_FILE="${ROOT_PATH}/config.tfvars"
-  else
-    if [[ ! -f "${CONFIG_FILE}" ]]; then
-      log "Terraform configuration file '${CONFIG_FILE}' not found!" "ERROR"
-      show_help
-    fi
+  elif [ ! -f "${CONFIG_FILE}" ]; then
+    log "Terraform configuration file '${CONFIG_FILE}' not found!" "ERROR"
+    show_help
   fi
+
   CONFIG_ABS_PATH="$(cd "$(dirname "${CONFIG_FILE}")"; pwd)/$(basename "${CONFIG_FILE}")"
   OVERRIDE_CONFIG_FILE="-var-file=${CONFIG_ABS_PATH}"
-  
+
   log "Terraform will use '${CONFIG_ABS_PATH}' to install the infrastructure."
 
   if [ -n "${UNKNOWN_ARGS}" ]; then
@@ -81,9 +80,10 @@ verify_configuration_file() {
   log "Verifying the config file."
 
   HAS_VALIDATION_ERR=
-  # Make sure the config values are defined
   set +e
-  INVALID_CONTENT=$(grep -o '^[^#]*' "${CONFIG_ABS_PATH}" | grep '<\|>')
+  # Check that all placeholder's i.e. "<REGION>" have been supplied with actual
+  # values.
+  PLACEHOLDER_VALUES_MISSING=$(grep -o '^[^#]*' "${CONFIG_ABS_PATH}" | grep '<\|>')
   set -e
   ENVIRONMENT_NAME=$(get_variable 'environment_name' "${CONFIG_ABS_PATH}")
   REGION=$(get_variable 'region' "${CONFIG_ABS_PATH}")
@@ -98,12 +98,12 @@ verify_configuration_file() {
     HAS_VALIDATION_ERR=1
   fi
 
-  if [ -n "${INVALID_CONTENT}" ]; then
+  if [ -n "${PLACEHOLDER_VALUES_MISSING}" ]; then
     log "Configuration file '${CONFIG_ABS_PATH##*/}' is not valid." "ERROR"
     log "Terraform uses this file to generate customised infrastructure for '${ENVIRONMENT_NAME}' on your AWS account."
     log "Please modify '${CONFIG_ABS_PATH##*/}' using a text editor and complete the configuration. "
     log "Then re-run the install.sh to deploy the infrastructure."
-    log "${INVALID_CONTENT}"
+    log "${PLACEHOLDER_VALUES_MISSING}"
     HAS_VALIDATION_ERR=1
   fi
 
@@ -193,7 +193,7 @@ set_current_context_k8s() {
   local EKS_CLUSTER="${EKS_CLUSTER_NAME:0:38}"
   CONTEXT_FILE="${ROOT_PATH}/kubeconfig_${EKS_CLUSTER}"
 
-  if [[ -f  "${CONTEXT_FILE}" ]]; then
+  if [ -f  "${CONTEXT_FILE}" ]; then
     log "EKS Cluster ${EKS_CLUSTER} in region ${REGION} is ready to use."
     log "Kubernetes config file could be found at '${CONTEXT_FILE}'"
     # No need to update Kubernetes context when run by e2e test
@@ -207,16 +207,17 @@ set_current_context_k8s() {
 
 resume_bamboo_server() {
   # Please note that if you import the dataset, make sure admin credential in config file (config.tfvars)
-  # is matched with admin info stored in dataset you import. 
+  # is matched with admin info stored in dataset you import.
   log "Resuming Bamboo server."
-  BAMBOO_DATASET=$(get_variable 'dataset_url' "${CONFIG_ABS_PATH}")
+  BAMBOO_DATASET_URL=$(get_variable 'dataset_url' "${CONFIG_ABS_PATH}")
   local SERVER_STATUS=
 
   # resume the server only if a dataset is imported
-  if [ -n "${BAMBOO_DATASET}" ]; then
+  if [ -n "${BAMBOO_DATASET_URL}" ]; then
     ADMIN_USERNAME=$(get_variable 'bamboo_admin_username' "${CONFIG_ABS_PATH}")
     ADMIN_PASSWORD=$(get_variable 'bamboo_admin_password' "${CONFIG_ABS_PATH}")
     if [ -z "${ADMIN_USERNAME}" ]; then
+      # Assume env variable has been set with usernamer
       ADMIN_USERNAME="${TF_VAR_bamboo_admin_username}"
     fi
     if [ -z "${ADMIN_PASSWORD}" ]; then
@@ -233,7 +234,7 @@ resume_bamboo_server() {
       bamboo_url=$(terraform output | grep '"bamboo" =' | sed -nE 's/^.*"(.*)".*$/\1/p')
       resume_bamboo_url="${bamboo_url}/rest/api/latest/server/resume"
       local RESULT=$(curl -s -u "${ADMIN_USERNAME}:${ADMIN_PASSWORD}" -X POST "${resume_bamboo_url}")
-      if [[ "x${RESULT}" == *"RUNNING"* ]]; then
+      if [ "x${RESULT}" == *"RUNNING"* ]; then
         SERVER_STATUS="RUNNING"
         log "Bamboo server was resumed and it is running successfully."
       elif [ "x${RESULT}" == *"AUTHENTICATED_FAILED"* ]; then
@@ -264,7 +265,7 @@ create_tfstate_resources
 # Deploy the infrastructure
 create_update_infrastructure
 
-# Manually add resource tags into ASG and EC2 
+# Manually add resource tags into ASG and EC2
 add_tags_to_asg_resources
 
 # Resume bamboo server if the credential is provided
