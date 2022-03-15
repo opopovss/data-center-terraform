@@ -22,6 +22,7 @@ module "bamboo" {
   namespace        = module.base-infrastructure.namespace
   vpc              = module.base-infrastructure.vpc
   eks              = module.base-infrastructure.eks
+  r53              = module.base-infrastructure.r53
   ingress          = module.base-infrastructure.ingress
 
   dataset_url = var.bamboo_dataset_url
@@ -34,7 +35,7 @@ module "bamboo" {
   admin_email_address = var.bamboo_admin_email_address
 
   db_major_engine_version = var.bamboo_db_major_engine_version
-  db_configuration = {
+  db_configuration        = {
     db_allocated_storage = var.bamboo_db_allocated_storage
     db_instance_class    = var.bamboo_db_instance_class
     db_iops              = var.bamboo_db_iops
@@ -73,6 +74,7 @@ module "jira" {
   namespace               = module.base-infrastructure.namespace
   vpc                     = module.base-infrastructure.vpc
   eks                     = module.base-infrastructure.eks
+  r53                     = module.base-infrastructure.r53
   ingress                 = module.base-infrastructure.ingress
   db_major_engine_version = var.jira_db_major_engine_version
   db_allocated_storage    = var.jira_db_allocated_storage
@@ -104,10 +106,11 @@ module "confluence" {
   vpc              = module.base-infrastructure.vpc
   eks              = module.base-infrastructure.eks
   ingress          = module.base-infrastructure.ingress
+  r53              = module.base-infrastructure.r53
   pvc_claim_name   = module.base-infrastructure.pvc_claim_name
 
   db_major_engine_version = var.confluence_db_major_engine_version
-  db_configuration = {
+  db_configuration        = {
     db_allocated_storage = var.confluence_db_allocated_storage
     db_instance_class    = var.confluence_db_instance_class
     db_iops              = var.confluence_db_iops
@@ -139,6 +142,7 @@ module "bitbucket" {
   namespace               = module.base-infrastructure.namespace
   vpc                     = module.base-infrastructure.vpc
   eks                     = module.base-infrastructure.eks
+  r53                     = module.base-infrastructure.r53
   ingress                 = module.base-infrastructure.ingress
   db_major_engine_version = var.bitbucket_db_major_engine_version
   db_allocated_storage    = var.bitbucket_db_allocated_storage

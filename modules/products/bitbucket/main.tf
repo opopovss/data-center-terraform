@@ -2,7 +2,7 @@
 resource "aws_route53_record" "bitbucket" {
   count = local.domain_supplied ? 1 : 0
 
-  zone_id = var.ingress.outputs.r53_zone
+  zone_id = var.r53.outputs.zone_id
   name    = local.product_domain_name
   type    = "A"
 

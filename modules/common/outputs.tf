@@ -23,6 +23,11 @@ output "efs" {
   description = "EFS Module"
 }
 
+output "r53" {
+  value = module.r53
+  description = "Route53 Module"
+}
+
 output "ingress" {
   value       = module.ingress
   description = "Ingress Module"

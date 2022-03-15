@@ -17,7 +17,6 @@ import (
 )
 
 func bitbucketHealthTests(t *testing.T, testConfig TestConfig, productUrl string) {
-
 	printTestBanner(bitbucket, "Tests")
 	assertBitbucketStatusEndpoint(t, productUrl)
 	assertBitbucketNfsConnectivity(t, testConfig)
@@ -58,9 +57,14 @@ func assertBitbucketNfsConnectivity(t *testing.T, testConfig TestConfig) {
 }
 
 func assertBitbucketSshConnectivity(t *testing.T, testConfig TestConfig, productUrl string) {
-	host := getHostFrom(productUrl)
-
 	println("Asserting Bitbucket SSH connectivity ...")
+
+	/* Extract host from product URL. This approach will
+	   work for both URL types (with/without domain) e.g.
+	   - https://bitbucket.e2etest-djptes.deplops.com
+	   - http://aefdad028c5cf43fe8bebd6c81c3ef1e-1693665646.eu-west-2.elb.amazonaws.com/bitbucket
+	*/
+	host := strings.Split(productUrl, "/")[2]
 
 	addServerToKnownHosts(t, host)
 	addPublicKeyToServer(t, testConfig.BitbucketPassword, productUrl)
@@ -73,6 +77,7 @@ func addServerToKnownHosts(t *testing.T, host string) {
 
 	println(fmt.Sprintf("Adding %s to known_hosts ...", host))
 
+	// Get the SSH public key from Bitbucket server
 	cmd := exec.Command("ssh-keyscan", "-t", "rsa", "-p 7999", host)
 	output, _ := cmd.CombinedOutput()
 
@@ -165,8 +170,4 @@ func cloneRepo(t *testing.T, host string) {
 	})
 	assert.Error(t, err)
 	assert.Equal(t, "remote repository is empty", err.Error())
-}
-
-func getHostFrom(productUrl string) string {
-	return strings.Split(productUrl, "/")[2]
 }

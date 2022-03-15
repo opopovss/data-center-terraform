@@ -31,12 +31,21 @@ module "efs" {
   csi_controller_replica_count = var.desired_capacity >= 2 ? 2 : 1
 }
 
+module "r53" {
+  count  = local.ingress_domain != null ? 1 : 0
+  source = "../AWS/r53"
+
+  #inputs
+  ingress_domain = local.ingress_domain
+}
+
 module "ingress" {
   source     = "../AWS/ingress"
   depends_on = [module.eks]
 
   # inputs
   ingress_domain = local.ingress_domain
+  r53            = module.r53
   enable_ssh_tcp = var.enable_ssh_tcp
 }
 

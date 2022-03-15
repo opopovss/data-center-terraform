@@ -22,6 +22,11 @@ variable "eks" {
   type        = any
 }
 
+variable "r53" {
+  description = "R53 resources for domain base routing over TLS"
+  type = any
+}
+
 variable "ingress" {
   default = null
   type    = any

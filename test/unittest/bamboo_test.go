@@ -48,11 +48,9 @@ var BambooCorrectVariables = map[string]interface{}{
 	"db_major_engine_version": "13",
 	"ingress": map[string]interface{}{
 		"outputs": map[string]interface{}{
-			"r53_zone":        "dummy_r53_zone",
-			"domain":          "dummy.domain.com",
-			"certificate_arn": "dummy_arn",
-			"lb_hostname":     "dummy.hostname.com.au",
-			"lb_zone_id":      "dummy_zone_id",
+			"domain":      "dummy.domain.com",
+			"lb_hostname": "dummy.hostname.com.au",
+			"lb_zone_id":  "dummy_zone_id",
 		},
 	},
 	"dataset_url": nil,
