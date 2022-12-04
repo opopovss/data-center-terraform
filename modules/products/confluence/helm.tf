@@ -13,6 +13,7 @@ resource "helm_release" "confluence" {
   version    = local.confluence_helm_chart_version
   timeout    = var.installation_timeout * 60
 
+
   values = [
     yamlencode({
       replicaCount = var.replica_count,
@@ -35,7 +36,7 @@ resource "helm_release" "confluence" {
             }
           }
         }
-        additionalJvmArgs = concat(local.dcapt_analytics_property)
+        additionalJvmArgs = concat(local.dcapt_analytics_property, local.irsa_properties)
       }
       synchrony = {
         resources = {
@@ -85,6 +86,7 @@ resource "helm_release" "confluence" {
     local.synchrony_settings_stanza,
     local.version_tag,
     local.db_restore_env_vars,
+    local.service_account_annotations
   ]
 }
 

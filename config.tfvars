@@ -230,6 +230,10 @@ synchrony_stack_size = "2048k"
 confluence_local_home_size  = "10Gi"
 confluence_shared_home_size = "10Gi"
 
+# Use AWS S3 bucket to store attachments. S3 bucket, IAM roles and corresponding Confluence S3 config
+# are created and injected into Confluence container automatically. Default value is false
+# confluence_s3_attachments_storage = true
+
 # Confluence NFS instance resource configuration
 #confluence_nfs_requests_cpu    = "<REQUESTS_CPU>"
 #confluence_nfs_requests_memory = "<REQUESTS_MEMORY>"

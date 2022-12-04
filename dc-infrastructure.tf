@@ -21,6 +21,7 @@ module "base-infrastructure" {
   osquery_env           = var.osquery_env
   osquery_version       = var.osquery_version
   kinesis_log_producers_role_arns = var.kinesis_log_producers_role_arns
+  confluence_s3_attachments_storage = var.confluence_s3_attachments_storage
 }
 
 module "bamboo" {
@@ -141,6 +142,7 @@ module "confluence" {
 
   environment_name = var.environment_name
   namespace        = module.base-infrastructure.namespace
+  region_name      = var.region
   vpc              = module.base-infrastructure.vpc
   eks              = module.base-infrastructure.eks
   ingress          = module.base-infrastructure.ingress
@@ -163,6 +165,8 @@ module "confluence" {
   version_tag               = var.confluence_version_tag
   enable_synchrony          = var.confluence_collaborative_editing_enabled
   termination_grace_period  = var.confluence_termination_grace_period
+  confluence_s3_attachments_storage = var.confluence_s3_attachments_storage
+
 
   confluence_configuration = {
     helm_version = var.confluence_helm_chart_version
